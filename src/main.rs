@@ -138,37 +138,47 @@ macro_rules! _brainfuck {
         _brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; [> $($bf:tt)*] $($tt:tt)*) => {
-        $runner._point = ($runner._point + stringify!(> $($bf)*).chars().filter(|c| !c.is_whitespace()).count()) % $runner._mem.len();
+        $runner._point = $runner._point
+            .checked_add(
+                stringify!(> $($bf)*)
+                .chars()
+                .filter(|c| !c.is_whitespace())
+                .count(),
+            )
+            .filter(|v| v < &$runner._mem.len())
+            .expect("Range Error: Memory address too large");
         _brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; [>> $($bf:tt)*] $($tt:tt)*) => {
-        $runner._point = ($runner._point + stringify!(>> $($bf)*).chars().filter(|c| !c.is_whitespace()).count()) % $runner._mem.len();
+        $runner._point = $runner._point
+            .checked_add(
+                stringify!(>> $($bf)*)
+                .chars()
+                .filter(|c| !c.is_whitespace())
+                .count(),
+            )
+            .filter(|v| v < &$runner._mem.len())
+            .expect("Range Error: Memory address too large");
         _brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; [< $($bf:tt)*] $($tt:tt)*) => {
-        let left = stringify!(< $($bf)*).chars().filter(|c| !c.is_whitespace()).count();
-        match $runner._point.checked_sub(left) {
-            Some(v) => {
-                $runner._point = v;
-            }
-            None => {
-                $runner._point = $runner._mem.len() - (left - $runner._point);
-            }
-        }
-
+        $runner._point = $runner._point
+            .checked_sub(
+                stringify!(< $($bf)*)
+                .chars()
+                .filter(|c| !c.is_whitespace())
+                .count(),
+            ).expect("Range Error: Negative memory address");
         _brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; [<< $($bf:tt)*] $($tt:tt)*) => {
-        let left = stringify!(<< $($bf)*).chars().filter(|c| !c.is_whitespace()).count();
-        match $runner._point.checked_sub(left) {
-            Some(v) => {
-                $runner._point = v;
-            }
-            None => {
-                $runner._point = $runner._mem.len() - (left - $runner._point);
-            }
-        }
-
+        $runner._point = $runner._point
+            .checked_sub(
+                stringify!(<< $($bf)*)
+                .chars()
+                .filter(|c| !c.is_whitespace())
+                .count(),
+            ).expect("Range Error: Negative memory address");
         _brainfuck!(@ $runner; [] $($tt)*);
     };
 
