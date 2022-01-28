@@ -12,7 +12,7 @@ macro_rules! brainfuck {
                 _mem: [0u8; $mem],
                 _point: 0,
             };
-            _brainfuck!(@ _bf; [] $($tt)*);
+            $crate::_brainfuck!(@ _bf; [] $($tt)*);
         }
     };
 }
@@ -22,43 +22,43 @@ macro_rules! brainfuck {
 macro_rules! _brainfuck {
     //Stack is empty
     (@ $runner:ident; [] + $($tt:tt)*) => {
-        _brainfuck!(@ $runner; +[1_usize] $($tt)*);
+        $crate::_brainfuck!(@ $runner; +[1_usize] $($tt)*);
     };
     (@ $runner:ident; [] - $($tt:tt)*) => {
-        _brainfuck!(@ $runner; -[1_usize] $($tt)*);
+        $crate::_brainfuck!(@ $runner; -[1_usize] $($tt)*);
     };
     (@ $runner:ident; [] -> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; -[1_usize] > $($tt)*);
+        $crate::_brainfuck!(@ $runner; -[1_usize] > $($tt)*);
     };
     (@ $runner:ident; [] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; <[1_usize] $($tt)*);
+        $crate::_brainfuck!(@ $runner; <[1_usize] $($tt)*);
     };
     (@ $runner:ident; [] <- $($tt:tt)*) => {
-        _brainfuck!(@ $runner; <[1_usize] - $($tt)*);
+        $crate::_brainfuck!(@ $runner; <[1_usize] - $($tt)*);
     };
     (@ $runner:ident; [] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; <[2_usize] $($tt)*);
+        $crate::_brainfuck!(@ $runner; <[2_usize] $($tt)*);
     };
     (@ $runner:ident; [] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; >[1_usize] $($tt)*);
+        $crate::_brainfuck!(@ $runner; >[1_usize] $($tt)*);
     };
     (@ $runner:ident; [] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; >[2_usize] $($tt)*);
+        $crate::_brainfuck!(@ $runner; >[2_usize] $($tt)*);
     };
     //Special tokens, stack should always be empty on call
     (@ $runner:ident; [] [ $($loop:tt)* ] $($tt:tt)*) => {
         while $runner._mem[$runner._point] != 0 {
-            _brainfuck!(@ $runner; [] $($loop)*);
+            $crate::_brainfuck!(@ $runner; [] $($loop)*);
         }
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; [] . $($tt:tt)*) => {
         print!("{}", $runner._mem[$runner._point] as char);
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; [] .. $($tt:tt)*) => {
         print!("{}", $runner._mem[$runner._point] as char);
-        _brainfuck!(@ $runner; [] . $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] . $($tt)*);
     };
     (@ $runner:ident; [] , $($tt:tt)*) => {
         match $runner._input.next() {
@@ -67,56 +67,56 @@ macro_rules! _brainfuck {
             },
             None => panic!("Unexpected end of input"),
         };
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
 
     //Next is self
     (@ $runner:ident; +[$bf:expr] + $($tt:tt)*) => {
-        _brainfuck!(@ $runner; +[$bf+1] $($tt)*);
+        $crate::_brainfuck!(@ $runner; +[$bf+1] $($tt)*);
     };
     (@ $runner:ident; -[$bf:expr] - $($tt:tt)*) => {
-        _brainfuck!(@ $runner; -[$bf+1] $($tt)*);
+        $crate::_brainfuck!(@ $runner; -[$bf+1] $($tt)*);
     };
     (@ $runner:ident; -[$bf:expr] -> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; -[$bf+1] > $($tt)*);
+        $crate::_brainfuck!(@ $runner; -[$bf+1] > $($tt)*);
     };
     (@ $runner:ident; >[$bf:expr] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; >[$bf+1] $($tt)*);
+        $crate::_brainfuck!(@ $runner; >[$bf+1] $($tt)*);
     };
     (@ $runner:ident; >[$bf:expr] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; >[$bf+2] $($tt)*);
+        $crate::_brainfuck!(@ $runner; >[$bf+2] $($tt)*);
     };
     (@ $runner:ident; <[$bf:expr] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; <[$bf+1] $($tt)*);
+        $crate::_brainfuck!(@ $runner; <[$bf+1] $($tt)*);
     };
     (@ $runner:ident; <[$bf:expr] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; <[$bf+2] $($tt)*);
+        $crate::_brainfuck!(@ $runner; <[$bf+2] $($tt)*);
     };
     (@ $runner:ident; <[$bf:expr] <- $($tt:tt)*) => {
-        _brainfuck!(@ $runner; <[$bf+1] - $($tt)*);
+        $crate::_brainfuck!(@ $runner; <[$bf+1] - $($tt)*);
     };
 
     //Next is new token
     (@ $runner:ident; +[$bf:expr] $($tt:tt)*) => {
         $runner._mem[$runner._point] = $runner._mem[$runner._point].wrapping_add($bf as u8);
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; -[$bf:expr] $($tt:tt)*) => {
         $runner._mem[$runner._point] = $runner._mem[$runner._point].wrapping_sub($bf as u8);
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; >[$bf:expr] $($tt:tt)*) => {
         $runner._point = $runner._point
             .checked_add($bf)
             .filter(|v| v < &$runner._mem.len())
             .expect("Range Error: Memory address too large");
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
     (@ $runner:ident; <[$bf:expr] $($tt:tt)*) => {
         $runner._point = $runner._point
             .checked_sub($bf)
             .expect("Range Error: Negative memory address");
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
 
     //Exit
@@ -126,7 +126,7 @@ macro_rules! _brainfuck {
     //literal matches above here
     //Next is non-token
     (@ $runner:ident; [] $_:tt $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [] $($tt)*);
+        $crate::_brainfuck!(@ $runner; [] $($tt)*);
     };
 }
 
