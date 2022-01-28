@@ -22,22 +22,28 @@ macro_rules! brainfuck {
 macro_rules! _brainfuck {
     //Stack is empty
     (@ $runner:ident; [] + $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [+] $($tt)*);
+        _brainfuck!(@ $runner; +[1_usize] $($tt)*);
     };
     (@ $runner:ident; [] - $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [-] $($tt)*);
+        _brainfuck!(@ $runner; -[1_usize] $($tt)*);
+    };
+    (@ $runner:ident; [] -> $($tt:tt)*) => {
+        _brainfuck!(@ $runner; -[1_usize] > $($tt)*);
     };
     (@ $runner:ident; [] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [<] $($tt)*);
+        _brainfuck!(@ $runner; <[1_usize] $($tt)*);
+    };
+    (@ $runner:ident; [] <- $($tt:tt)*) => {
+        _brainfuck!(@ $runner; <[1_usize] - $($tt)*);
     };
     (@ $runner:ident; [] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [<<] $($tt)*);
+        _brainfuck!(@ $runner; <[2_usize] $($tt)*);
     };
     (@ $runner:ident; [] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [>] $($tt)*);
+        _brainfuck!(@ $runner; >[1_usize] $($tt)*);
     };
     (@ $runner:ident; [] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [>>] $($tt)*);
+        _brainfuck!(@ $runner; >[2_usize] $($tt)*);
     };
     //Special tokens, stack should always be empty on call
     (@ $runner:ident; [] [ $($loop:tt)* ] $($tt:tt)*) => {
@@ -61,124 +67,55 @@ macro_rules! _brainfuck {
             },
             None => panic!("Unexpected end of input"),
         };
-        _brainfuck!(@ $runner; [>] $($tt)*);
+        _brainfuck!(@ $runner; [] $($tt)*);
     };
 
     //Next is self
-    (@ $runner:ident; [+ $($bf:tt)*] + $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [+ + $($bf)*] $($tt)*);
+    (@ $runner:ident; +[$bf:expr] + $($tt:tt)*) => {
+        _brainfuck!(@ $runner; +[$bf+1] $($tt)*);
     };
-    (@ $runner:ident; [- $($bf:tt)*] - $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [- - $($bf)*] $($tt)*);
+    (@ $runner:ident; -[$bf:expr] - $($tt:tt)*) => {
+        _brainfuck!(@ $runner; -[$bf+1] $($tt)*);
     };
-    (@ $runner:ident; [> $($bf:tt)*] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [> > $($bf)*] $($tt)*);
+    (@ $runner:ident; -[$bf:expr] -> $($tt:tt)*) => {
+        _brainfuck!(@ $runner; -[$bf+1] > $($tt)*);
     };
-    (@ $runner:ident; [>> $($bf:tt)*] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [> > > $($bf)*] $($tt)*);
+    (@ $runner:ident; >[$bf:expr] > $($tt:tt)*) => {
+        _brainfuck!(@ $runner; >[$bf+1] $($tt)*);
     };
-    (@ $runner:ident; [> $($bf:tt)*] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [> > > $($bf)*] $($tt)*);
+    (@ $runner:ident; >[$bf:expr] >> $($tt:tt)*) => {
+        _brainfuck!(@ $runner; >[$bf+2] $($tt)*);
     };
-    (@ $runner:ident; [>> $($bf:tt)*] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [> > > > $($bf)*] $($tt)*);
+    (@ $runner:ident; <[$bf:expr] < $($tt:tt)*) => {
+        _brainfuck!(@ $runner; <[$bf+1] $($tt)*);
     };
-    (@ $runner:ident; [< $($bf:tt)*] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [< < $($bf)*] $($tt)*);
+    (@ $runner:ident; <[$bf:expr] << $($tt:tt)*) => {
+        _brainfuck!(@ $runner; <[$bf+2] $($tt)*);
     };
-    (@ $runner:ident; [<< $($bf:tt)*] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [< < < $($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [< $($bf:tt)*] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [< < < $($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [<< $($bf:tt)*] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [< < < < $($bf)*] $($tt)*);
-    };
-
-    //Next is inverse
-    (@ $runner:ident; [+ $($bf:tt)*] - $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [- $($bf:tt)*] + $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [> $($bf:tt)*] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [>> $($bf:tt)*] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [> $($bf:tt)*] << $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] < $($tt)*);
-    };
-    (@ $runner:ident; [>> $($bf:tt)*] < $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [> $($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [< $($bf:tt)*] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [<< $($bf:tt)*] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] $($tt)*);
-    };
-    (@ $runner:ident; [< $($bf:tt)*] >> $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [$($bf)*] > $($tt)*);
-    };
-    (@ $runner:ident; [<< $($bf:tt)*] > $($tt:tt)*) => {
-        _brainfuck!(@ $runner; [< $($bf)*] $($tt)*);
+    (@ $runner:ident; <[$bf:expr] <- $($tt:tt)*) => {
+        _brainfuck!(@ $runner; <[$bf+1] - $($tt)*);
     };
 
     //Next is new token
-    (@ $runner:ident; [+ $($bf:tt)*] $($tt:tt)*) => {
-        $runner._mem[$runner._point] = $runner._mem[$runner._point].wrapping_add(stringify!(+ $($bf)*).chars().filter(|c| !c.is_whitespace()).count() as u8);
+    (@ $runner:ident; +[$bf:expr] $($tt:tt)*) => {
+        $runner._mem[$runner._point] = $runner._mem[$runner._point].wrapping_add($bf as u8);
         _brainfuck!(@ $runner; [] $($tt)*);
     };
-    (@ $runner:ident; [- $($bf:tt)*] $($tt:tt)*) => {
-        $runner._mem[$runner._point] = $runner._mem[$runner._point].wrapping_sub(stringify!(- $($bf)*).chars().filter(|c| !c.is_whitespace()).count() as u8);
+    (@ $runner:ident; -[$bf:expr] $($tt:tt)*) => {
+        $runner._mem[$runner._point] = $runner._mem[$runner._point].wrapping_sub($bf as u8);
         _brainfuck!(@ $runner; [] $($tt)*);
     };
-    (@ $runner:ident; [> $($bf:tt)*] $($tt:tt)*) => {
+    (@ $runner:ident; >[$bf:expr] $($tt:tt)*) => {
         $runner._point = $runner._point
-            .checked_add(
-                stringify!(> $($bf)*)
-                .chars()
-                .filter(|c| !c.is_whitespace())
-                .count(),
-            )
+            .checked_add($bf)
             .filter(|v| v < &$runner._mem.len())
             .expect("Range Error: Memory address too large");
         _brainfuck!(@ $runner; [] $($tt)*);
     };
-    (@ $runner:ident; [>> $($bf:tt)*] $($tt:tt)*) => {
+    (@ $runner:ident; <[$bf:expr] $($tt:tt)*) => {
         $runner._point = $runner._point
-            .checked_add(
-                stringify!(>> $($bf)*)
-                .chars()
-                .filter(|c| !c.is_whitespace())
-                .count(),
-            )
-            .filter(|v| v < &$runner._mem.len())
-            .expect("Range Error: Memory address too large");
-        _brainfuck!(@ $runner; [] $($tt)*);
-    };
-    (@ $runner:ident; [< $($bf:tt)*] $($tt:tt)*) => {
-        $runner._point = $runner._point
-            .checked_sub(
-                stringify!(< $($bf)*)
-                .chars()
-                .filter(|c| !c.is_whitespace())
-                .count(),
-            ).expect("Range Error: Negative memory address");
-        _brainfuck!(@ $runner; [] $($tt)*);
-    };
-    (@ $runner:ident; [<< $($bf:tt)*] $($tt:tt)*) => {
-        $runner._point = $runner._point
-            .checked_sub(
-                stringify!(<< $($bf)*)
-                .chars()
-                .filter(|c| !c.is_whitespace())
-                .count(),
-            ).expect("Range Error: Negative memory address");
+            .checked_sub($bf)
+            .expect("Range Error: Negative memory address");
         _brainfuck!(@ $runner; [] $($tt)*);
     };
 
